@@ -1,11 +1,11 @@
 {
     "extname": {
-        "message": "Quick Bookmarks Menu"
+        "message": "yande.re image download"
     },
     "extdesc": {
-        "message": "Quick access to bookmarks or favorites."
+        "message": "download images from https://yande.re/post/show/*"
     },
     "tooltip": {
-        "message": "Quick Bookmarks Menu"
+        "message": "yande.re image download"
     }
 }

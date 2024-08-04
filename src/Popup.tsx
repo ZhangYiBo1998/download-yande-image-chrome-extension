@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-
 import "./Popup.scss";
 
 // 定义PopupProps接口
@@ -113,35 +112,22 @@ function Popup(props: PopupProps) {
 							setTitle((props[0].result.title as string) || "");
 						});
 				} else {
-					chrome.tabs.executeScript(
-						tabId,
-						{
-							code: `(${scriptForImgDownload.toString()})()`,
-						},
-						(results) => {
-							if (chrome.runtime.lastError) {
-								console.error(chrome.runtime.lastError);
-								return;
-							}
-
-							console.log("script injected", results);
-
-							if (results && results.length > 0) {
-								setHrefValue((results[0].href as string) || "");
-								setTitle((results[0].title as string) || "");
-							}
-						}
-					);
+					setDownloadBtnDisabled(true);
 				}
 			} catch (e) {
+				console.log("error: ", e);
 				setDownloadBtnDisabled(true);
 			}
 		});
 	}, []);
 
+	useEffect(() => {
+		setDownloadBtnDisabled(!hrefValue);
+	}, [hrefValue])
+
 	return (
 		<div id="popupBox">
-			<div className="ruleBox" style={{ display: "none" }}>
+			<div className="ruleBox hidden">
 				<div className="discriptionBox">
 					<h3 className="title">yande.re图片下载器 文件名規則：</h3>
 					<div className="discription">
@@ -164,8 +150,12 @@ function Popup(props: PopupProps) {
 					</button>
 				</div>
 			</div>
-			<div className={!downloadBtnDisabled ? "hidden" : ""}>
-				下载功能暂不可用，请使用最新版Chrome浏览器。
+			<div
+				className={!downloadBtnDisabled ? "hidden" : ""}
+				style={{ textAlign: "center" }}
+			>
+				<p>当前页无法下载，请前往https://yande.re/post/show/*</p>
+				<p>若页面正确，请使用最新版Chrome浏览器。</p>
 			</div>
 			<button
 				className="downloadBtn"

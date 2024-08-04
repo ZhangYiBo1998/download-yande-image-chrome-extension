@@ -18,7 +18,6 @@
 		}
 	},
 	"permissions": ["activeTab", "storage", "scripting"],
-	"host_permissions": ["https://yande.re/*", "https://files.yande.re/*"],
 	"background": {
 		"service_worker": "background.js",
 		"type": "module"
