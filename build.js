@@ -41,8 +41,6 @@ const buildOptions = {
     keepNames: true,
     format: 'esm',
     target: 'chrome86',
-    jsxFactory: 'h',
-    jsxFragment: 'Fragment',
     logLevel: 'info',
     plugins: [scssPlugin],
 
