@@ -9,24 +9,19 @@ interface PopupProps {
 
 // 定义弹出窗口组件
 function Popup(props: PopupProps) {
-	// 弹出窗口标题
-	const ruleStr = props["ruleStr"] || "";
-
+	const [ruleStr, setRuleStr] = useState<string>(props["ruleStr"] || "{title}");
 	// 输入框内容
 	const [inputValue, setInputValue] = useState<string>("");
 	// 图片链接
 	const [hrefValue, setHrefValue] = useState<string>("");
 	// 页面标题
-	const [title, setTitle] = useState<string>("");
+	const [pageTitle, setPageTitle] = useState<string>("");
 	// 文件名
-	const [fileName, setFileName] = useState<string>(() => {
-		const ruleStr = props["ruleStr"] || "{title}";
-
-		return replacePlaceholders(ruleStr);
-	});
+	const [fileName, setFileName] = useState<string>("");
 	// 图片下载按钮是否可用
 	const [downloadBtnDisabled, setDownloadBtnDisabled] =
 		useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 
 	// 输入框内容变化时
 	const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,17 +34,20 @@ function Popup(props: PopupProps) {
 		chrome.storage.local.set({
 			ruleStr: inputValue,
 		});
-
-		setFileName(replacePlaceholders(inputValue));
+		setRuleStr(inputValue);
+		setFileName(replacePlaceholders(inputValue, pageTitle));
 	};
 
 	// 点击下载按钮
 	const handleDownload = () => {
-		imgDownload(hrefValue, fileName);
+		if(loading || downloadBtnDisabled){
+			return;
+		}
+		imgDownload(hrefValue);
 	};
 
 	// 替换规则中的占位符
-	function replacePlaceholders(inputString: string): string {
+	function replacePlaceholders(inputString: string, title: string): string {
 		const date = new Date().toLocaleString();
 
 		// 使用正则表达式替换 {title} 和 {date}
@@ -57,14 +55,19 @@ function Popup(props: PopupProps) {
 	}
 
 	// 下载图片
-	function imgDownload(
-		href: string,
-		fileName: string = new Date().toLocaleString()
-	) {
-		const aEle = document.createElement("a");
-		aEle.href = href;
-		aEle.download = fileName;
-		aEle.click();
+	function imgDownload(href: string) {
+		console.log("downloading...", href, fileName);
+
+		setLoading(true)
+		chrome.downloads.download({
+			url: href, // 图片的URL
+			filename: fileName, // 下载后的文件名
+			saveAs: false // 是否显示“另存为”对话框
+		  }, function(downloadId) {
+			console.log('Download started with ID:', downloadId);
+			setLoading(false)
+			window.close();
+		  });
 	}
 
 	// 注入到当前标签页的JS脚本函数
@@ -106,10 +109,12 @@ function Popup(props: PopupProps) {
 						})
 						.then((props) => {
 							console.log("script injected", props);
+							const { href = "" as string, title = "" as string } = props[0].result;
 
 							// 存储图片链接和页面标题
-							setHrefValue((props[0].result.href as string) || "");
-							setTitle((props[0].result.title as string) || "");
+							setHrefValue(href);
+							setPageTitle(title);
+							setFileName(replacePlaceholders(ruleStr, title));
 						});
 				} else {
 					setDownloadBtnDisabled(true);
@@ -123,7 +128,7 @@ function Popup(props: PopupProps) {
 
 	useEffect(() => {
 		setDownloadBtnDisabled(!hrefValue);
-	}, [hrefValue])
+	}, [hrefValue]);
 
 	return (
 		<div id="popupBox">
@@ -162,7 +167,7 @@ function Popup(props: PopupProps) {
 				onClick={handleDownload}
 				disabled={downloadBtnDisabled}
 			>
-				下载
+				{loading ? '等待下载......' : '下载'}
 			</button>
 		</div>
 	);
