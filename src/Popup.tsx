@@ -2,41 +2,15 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./Popup.scss";
 
-// 定义PopupProps接口
-interface PopupProps {
-	ruleStr: string;
-}
-
 // 定义弹出窗口组件
-function Popup(props: PopupProps) {
-	const [ruleStr, setRuleStr] = useState<string>(props["ruleStr"] || "{title}");
-	// 输入框内容
-	const [inputValue, setInputValue] = useState<string>("");
+function Popup() {
 	// 图片链接
 	const [hrefValue, setHrefValue] = useState<string>("");
-	// 页面标题
-	const [pageTitle, setPageTitle] = useState<string>("");
 	// 文件名
 	const [fileName, setFileName] = useState<string>("");
 	// 图片下载按钮是否可用
-	const [downloadBtnDisabled, setDownloadBtnDisabled] =
-		useState<boolean>(false);
+	const [downloadBtnDisabled, setDownloadBtnDisabled] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
-
-	// 输入框内容变化时
-	const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value || "";
-		setInputValue(value);
-	};
-
-	// 保存规则
-	const handleSave = () => {
-		chrome.storage.local.set({
-			ruleStr: inputValue,
-		});
-		setRuleStr(inputValue);
-		setFileName(replacePlaceholders(inputValue, pageTitle));
-	};
 
 	// 点击下载按钮
 	const handleDownload = () => {
@@ -46,14 +20,6 @@ function Popup(props: PopupProps) {
 
 		imgDownload(hrefValue);
 	};
-
-	// 替换规则中的占位符
-	function replacePlaceholders(inputString: string, title: string): string {
-		const date = new Date().toLocaleString();
-
-		// 使用正则表达式替换 {title} 和 {date}
-		return inputString.replace(/{title}/g, title).replace(/{date}/g, date);
-	}
 
 	// 下载图片
 	function imgDownload(href: string) {
@@ -107,8 +73,6 @@ function Popup(props: PopupProps) {
 	}
 
 	useEffect(() => {
-		setInputValue(ruleStr);
-
 		// 在扩展的后台JS脚本中获取网页元素的内容
 		chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			const tabId: number = tabs[0].id as number;
@@ -126,8 +90,7 @@ function Popup(props: PopupProps) {
 
 							// 存储图片链接和页面标题
 							setHrefValue(href);
-							setPageTitle(title);
-							setFileName(replacePlaceholders(ruleStr, title));
+							setFileName(title);
 						});
 				} else {
 					setDownloadBtnDisabled(true);
@@ -145,34 +108,11 @@ function Popup(props: PopupProps) {
 
 	return (
 		<div id="popupBox">
-			<div className="ruleBox hidden">
-				<div className="discriptionBox">
-					<h3 className="title">yande.re图片下载器 文件名規則：</h3>
-					<div className="discription">
-						<p>{"{title}当前标签页标题"}</p>
-						<p>{"{date}当前时间，格式：YYYY-MM-DD HH:mm:ss"}</p>
-						<p>{"{id}图片id，如：12345678"}</p>
-					</div>
-				</div>
-
-				<div className="inputBox">
-					<input
-						type="text"
-						title=""
-						placeholder="文件名規則"
-						value={inputValue}
-						onChange={handleTitleChange}
-					/>
-					<button className="saveBtn" onClick={handleSave}>
-						保存规则
-					</button>
-				</div>
-			</div>
 			<div
 				className={!downloadBtnDisabled ? "hidden" : ""}
 				style={{ textAlign: "center" }}
 			>
-				<p>当前页无法下载，请前往https://yande.re/post/show/*</p>
+				<p>当前页无法下载，请前往{chrome.i18n.getMessage("enable_download_path")}</p>
 				<p>若页面正确，请使用最新版Chrome浏览器。</p>
 			</div>
 			<button
@@ -187,6 +127,4 @@ function Popup(props: PopupProps) {
 }
 
 // 加载配置并渲染弹出窗口
-chrome.storage.local.get(["ruleStr"], (props: any = {}) => {
-	ReactDOM.createRoot(document.body).render(<Popup {...props} />);
-});
+ReactDOM.createRoot(document.body).render(<Popup/>);
