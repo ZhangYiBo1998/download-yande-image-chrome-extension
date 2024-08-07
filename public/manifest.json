@@ -17,7 +17,7 @@
 			"32": "icons/qbm32.png"
 		}
 	},
-	"permissions": ["activeTab", "storage", "scripting", "downloads"],
+	"permissions": ["activeTab", "scripting", "downloads"],
 	"host_permissions": [
 	  "https://yande.re/*"
 	],
