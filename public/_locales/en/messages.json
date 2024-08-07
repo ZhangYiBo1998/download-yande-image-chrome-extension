@@ -1,11 +1,11 @@
 {
     "extname": {
-        "message": "yande.re image download"
+        "message": "luscious image download"
     },
     "extdesc": {
-        "message": "download images from https://yande.re/post/show/*"
+        "message": "download images from https://members.luscious.net/albums/*"
     },
     "tooltip": {
-        "message": "yande.re image download"
+        "message": "luscious image download"
     }
 }

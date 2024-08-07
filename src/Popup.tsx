@@ -40,9 +40,10 @@ function Popup(props: PopupProps) {
 
 	// 点击下载按钮
 	const handleDownload = () => {
-		if(loading || downloadBtnDisabled){
+		if (loading || downloadBtnDisabled) {
 			return;
 		}
+
 		imgDownload(hrefValue);
 	};
 
@@ -58,35 +59,46 @@ function Popup(props: PopupProps) {
 	function imgDownload(href: string) {
 		console.log("downloading...", href, fileName);
 
-		setLoading(true)
-		chrome.downloads.download({
-			url: href, // 图片的URL
-			filename: fileName, // 下载后的文件名
-			saveAs: false // 是否显示“另存为”对话框
-		  }, function(downloadId) {
-			console.log('Download started with ID:', downloadId);
-			setLoading(false)
-			window.close();
-		  });
+		setLoading(true);
+		chrome.downloads.download(
+			{
+				url: href, // 图片的URL
+				filename: undefined, // 下载后的文件名
+				saveAs: false, // 是否显示“另存为”对话框
+			},
+			function (downloadId) {
+				console.log("Download started with ID:", downloadId);
+				setLoading(false);
+				window.close();
+			}
+		);
 	}
 
 	// 注入到当前标签页的JS脚本函数
 	function scriptForImgDownload() {
 		const title = document.title.replaceAll(/[<>:"\/\\|?*#]/g, "");
 
-		const imgEle = document.querySelectorAll(
-			"#highres"
+		let aEle = document.querySelectorAll(
+			".dropdown-module__item-anchor--ZP16p"
 		)[0] as HTMLAnchorElement;
-		if (imgEle) {
-			imgEle.target = "_blank";
+		if (!aEle) {
+			const btnEle = document.querySelectorAll(
+				".picture-control-btn-group-right .o-btn[role='button']"
+			)[0] as HTMLButtonElement;
+			btnEle.click();
+
+			aEle = document.querySelectorAll(
+				".dropdown-module__item-anchor--ZP16p"
+			)[0] as HTMLAnchorElement;
+			const beginDateTime = new Date().getTime();
+			while (!aEle && new Date().getTime() - beginDateTime < 10000) {
+				aEle = document.querySelectorAll(
+					".dropdown-module__item-anchor--ZP16p"
+				)[0] as HTMLAnchorElement;
+			}
 		}
 
-		const pngEle = document.querySelectorAll("#png")[0] as HTMLAnchorElement;
-		if (pngEle) {
-			pngEle.target = "_blank";
-		}
-
-		const href = (pngEle || imgEle).href;
+		const href = aEle.href;
 
 		return {
 			title,
@@ -109,7 +121,8 @@ function Popup(props: PopupProps) {
 						})
 						.then((props) => {
 							console.log("script injected", props);
-							const { href = "" as string, title = "" as string } = props[0].result;
+							const { href = "" as string, title = "" as string } =
+								props[0].result;
 
 							// 存储图片链接和页面标题
 							setHrefValue(href);
@@ -167,7 +180,7 @@ function Popup(props: PopupProps) {
 				onClick={handleDownload}
 				disabled={downloadBtnDisabled}
 			>
-				{loading ? '等待下载......' : '下载'}
+				{loading ? "等待下载......" : "下载"}
 			</button>
 		</div>
 	);

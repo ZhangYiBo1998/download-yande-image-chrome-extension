@@ -19,7 +19,7 @@
 	},
 	"permissions": ["activeTab", "storage", "scripting", "downloads"],
 	"host_permissions": [
-	  "https://yande.re/*"
+	  "https://*.luscious.*/*"
 	],
 	"background": {
 		"service_worker": "background.js",

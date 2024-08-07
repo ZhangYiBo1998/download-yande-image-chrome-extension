@@ -1,11 +1,11 @@
 {
     "extname": {
-        "message": "yande.re图片下载器"
+        "message": "luscious图片下载器"
     },
     "extdesc": {
-        "message": "下载yande.re详情页的高清大图"
+        "message": "下载luscious详情页的高清大图"
     },
     "tooltip": {
-        "message": "yande.re图片下载器"
+        "message": "luscious图片下载器"
     }
 }
